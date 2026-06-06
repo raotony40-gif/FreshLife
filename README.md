@@ -1,461 +1,396 @@
-# 乐鲜生活 FreshLife
+# FreshLife 智慧生鲜商城
 
-乐鲜生活是一个社区生鲜电商项目，目标是实现用户从商品浏览、加入购物车、创建订单到后续履约的基础交易链路。
+## 项目简介
 
-当前项目已完成 SpringBoot 后端 MVP 基础能力：
+FreshLife 是基于 HarmonyOS + Spring Boot 构建的智慧生鲜商城系统。
 
-- 用户注册、登录、用户信息查询
-- 商品列表、商品详情、商品搜索
-- 商品详情 Redis 缓存
-- 商品列表 Redis 缓存
-- 购物车新增、查询、修改、删除
-- 订单创建、订单列表、订单详情、订单取消
+项目实现了商品展示、商品详情查询、购物车管理、订单管理等核心电商功能，并通过 Redis 缓存提升系统性能。
 
-HarmonyOS 用户端待开发。
+采用前后端分离架构：
+
+- Frontend：HarmonyOS NEXT（ArkTS）
+- Backend：Spring Boot 3
+- Database：MySQL 8
+- Cache：Redis
+
+---
+
+## 系统架构
+
+```text
+HarmonyOS App
+       │
+       ▼
+Spring Boot REST API
+       │
+ ┌─────┴─────┐
+ ▼           ▼
+MySQL      Redis
+```
+
+---
 
 ## 技术栈
 
-- SpringBoot 3
-- MyBatis Plus
-- MySQL 8
-- Redis 7
+### 前端
+
+- HarmonyOS NEXT
+- ArkTS
+- ArkUI
+
+### 后端
+
+- Spring Boot 3.x
+- Spring MVC
+- Spring Data Redis
+- MyBatis-Plus
 - JWT
-- Lombok
-- HarmonyOS ArkTS（待开发）
 
-## 环境要求
+### 数据库
 
-- JDK 17
-- Maven 3.9+
-- MySQL 8
-- Redis 7
+- MySQL 8.0
 
-## 数据库初始化步骤
+### 缓存
 
-数据库脚本位置：
+- Redis 7.x
 
-```text
-database/freshlife.sql
-```
+### 开发工具
 
-执行方式：
+- IntelliJ IDEA
+- DevEco Studio
+- Apifox
+- GitHub
 
-```bash
-mysql -uroot -p < database/freshlife.sql
-```
+---
 
-默认数据库名：
+## 项目结构
 
 ```text
-freshlife
+FreshLife
+│
+├── backend
+│   ├── controller
+│   ├── service
+│   ├── mapper
+│   ├── entity
+│   ├── config
+│   ├── exception
+│   └── utils
+│
+├── database
+│   └── freshlife.sql
+│
+├── docs
+│   ├── API.md
+│   └── Design.md
+│
+├── frontend
+│   └── HarmonyOS App
+│
+└── README.md
 ```
 
-当前脚本会创建以下核心表：
+---
 
-- `user`
-- `product`
-- `cart`
-- `orders`
-- `order_item`
+## 已实现功能
 
-并插入测试商品：
+### 商品列表
 
-- 西红柿
-- 鸡蛋
-- 牛奶
-- 苹果
-- 鸡胸肉
-
-后端默认数据库配置位于：
-
-```text
-backend/src/main/resources/application.yml
-```
-
-默认配置：
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/freshlife
-    username: root
-    password: root
-```
-
-如果本地 MySQL 账号密码不同，请修改 `application.yml`。
-
-## Redis 启动步骤
-
-本地 Redis 默认配置：
-
-```yaml
-spring:
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      database: 0
-```
-
-启动 Redis：
-
-```bash
-redis-server
-```
-
-检查 Redis 是否可用：
-
-```bash
-redis-cli ping
-```
-
-如果返回：
-
-```text
-PONG
-```
-
-说明 Redis 已启动。
-
-当前 Redis 用途：
-
-- 商品详情缓存：`product:{id}`，TTL 30 分钟
-- 商品不存在空值缓存：`product:{id}`，TTL 5 分钟
-- 商品列表缓存：`product:list:{page}:{size}:{priceSort}`，TTL 10 分钟
-
-## SpringBoot 启动步骤
-
-进入后端目录：
-
-```bash
-cd backend
-```
-
-编译：
-
-```bash
-mvn clean package
-```
-
-启动：
-
-```bash
-mvn spring-boot:run
-```
-
-或使用 jar 启动：
-
-```bash
-java -jar target/freshlife-backend-0.0.1-SNAPSHOT.jar
-```
-
-服务默认端口：
-
-```text
-8080
-```
-
-接口统一前缀：
-
-```text
-/api
-```
-
-示例：
-
-```text
-http://localhost:8080/api/product/list
-```
-
-## 接口说明
-
-统一返回格式：
-
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {}
-}
-```
-
-登录后需要在请求头中携带：
-
-```text
-Authorization: Bearer <token>
-```
-
-### User
-
-注册：
+接口：
 
 ```http
-POST /api/user/register
+GET /api/product/list
 ```
 
-请求示例：
+功能：
 
-```json
-{
-  "username": "test",
-  "password": "123456",
-  "phone": "13800000000"
-}
-```
+- 商品分页查询
+- Redis缓存
+- MyBatis-Plus分页
 
-登录：
+测试结果：
 
-```http
-POST /api/user/login
-```
+✅ 已完成
 
-请求示例：
+---
 
-```json
-{
-  "username": "test",
-  "password": "123456"
-}
-```
+### 商品详情
 
-获取当前用户信息：
-
-```http
-GET /api/user/info
-```
-
-### Product
-
-商品列表：
-
-```http
-GET /api/product/list?page=1&size=10
-```
-
-价格升序：
-
-```http
-GET /api/product/list?page=1&size=10&priceSort=asc
-```
-
-价格降序：
-
-```http
-GET /api/product/list?page=1&size=10&priceSort=desc
-```
-
-商品详情：
+接口：
 
 ```http
 GET /api/product/detail/{id}
 ```
 
-商品搜索：
+功能：
 
-```http
-GET /api/product/search?name=苹果&page=1&size=10
-```
+- 商品详情查询
+- Redis缓存
 
-### Cart
+测试结果：
 
-加入购物车：
+✅ 已完成
 
-```http
-POST /api/cart/add
-```
+---
 
-请求示例：
+## 开发计划
 
-```json
-{
-  "productId": 1,
-  "quantity": 2
-}
-```
+### 用户模块
 
-购物车列表：
+计划实现：
 
-```http
-GET /api/cart/list
-```
+- 用户注册
+- 用户登录
+- JWT认证
+- 用户信息管理
 
-修改购物车数量：
+---
 
-```http
-PUT /api/cart/update
-```
+### 购物车模块
 
-请求示例：
+计划实现：
 
-```json
-{
-  "cartId": 1,
-  "quantity": 3
-}
-```
+- 添加商品
+- 删除商品
+- 修改数量
+- 查询购物车
 
-删除购物车项：
+---
 
-```http
-DELETE /api/cart/remove/{cartId}
-```
+### 订单模块
 
-### Order
+计划实现：
 
-创建订单：
+- 创建订单
+- 查询订单
+- 取消订单
+- 状态管理
 
-```http
-POST /api/order/create
-```
+---
 
-订单列表：
+## 数据库设计
 
-```http
-GET /api/order/list
-```
-
-订单详情：
-
-```http
-GET /api/order/detail/{orderId}
-```
-
-取消订单：
-
-```http
-PUT /api/order/cancel/{orderId}
-```
-
-当前订单规则：
-
-- 创建订单会读取当前登录用户购物车
-- 创建订单会校验商品状态和库存
-- 创建订单会扣减库存并清空购物车
-- 只有 `WAIT_PAY` 状态订单可以取消
-- 取消订单会恢复库存
-- 暂未实现支付、配送、后台管理
-
-## 项目目录结构
+核心表：
 
 ```text
-FRESH-LIFE
-├── backend
-│   ├── pom.xml
-│   └── src
-│       └── main
-│           ├── java
-│           │   └── com
-│           │       └── freshlife
-│           │           ├── FreshLifeApplication.java
-│           │           ├── common
-│           │           │   └── Result.java
-│           │           ├── config
-│           │           │   ├── MybatisPlusConfig.java
-│           │           │   └── RedisConfig.java
-│           │           ├── controller
-│           │           │   ├── UserController.java
-│           │           │   ├── ProductController.java
-│           │           │   ├── CartController.java
-│           │           │   └── OrderController.java
-│           │           ├── dto
-│           │           ├── entity
-│           │           ├── exception
-│           │           ├── mapper
-│           │           ├── service
-│           │           ├── service.impl
-│           │           ├── utils
-│           │           └── vo
-│           └── resources
-│               └── application.yml
-├── database
-│   └── freshlife.sql
-├── docs
-│   ├── API.md
-│   ├── ERD.md
-│   └── PRD.md
-└── README.md
+user
+product
+cart
+orders
+order_item
 ```
 
-## 常见问题排查
-
-### 1. Maven 命令不可用
-
-现象：
+目前已完成：
 
 ```text
-mvn: command not found
+product
 ```
 
-解决：
+测试数据：
 
-- 安装 Maven 3.9+
-- 确认 `mvn -v` 可正常输出版本
-- 确认 JDK 版本是 17
+```text
+西红柿
+鸡蛋
+牛奶
+苹果
+鸡胸肉
+```
 
-### 2. MySQL 连接失败
+---
 
-检查：
+## 环境要求
 
-- MySQL 是否启动
-- 数据库 `freshlife` 是否已创建
-- `application.yml` 中账号密码是否正确
-- MySQL 端口是否为 `3306`
+### JDK
 
-### 3. Redis 连接失败
+```text
+Java 17+
+```
 
-检查：
+推荐：
+
+```text
+Temurin JDK 17
+```
+
+---
+
+### MySQL
+
+```text
+MySQL 8.0+
+```
+
+数据库名称：
+
+```text
+freshlife
+```
+
+---
+
+### Redis
+
+```text
+Redis 7+
+```
+
+默认配置：
+
+```text
+localhost:6379
+```
+
+---
+
+## 本地部署
+
+### 1. 克隆项目
 
 ```bash
-redis-cli ping
+git clone https://github.com/yourname/freshlife.git
 ```
 
-如果没有返回 `PONG`，说明 Redis 未启动或端口不正确。
+---
 
-### 4. 登录后接口返回 token 无效
+### 2. 创建数据库
 
-检查请求头是否正确：
+```sql
+CREATE DATABASE freshlife;
+```
+
+导入：
 
 ```text
-Authorization: Bearer <token>
+database/freshlife.sql
 ```
 
-注意 `Bearer` 后面需要有一个空格。
+---
 
-### 5. 商品详情缓存没有生效
+### 3. 修改配置文件
 
-检查：
+application.yml
 
-- Redis 是否启动
-- 是否请求了 `GET /api/product/detail/{id}`
-- Redis 中是否存在 `product:{id}` key
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/freshlife
+    username: freshlife
+    password: freshlife123456
+```
 
-### 6. 商品列表缓存没有生效
+---
 
-检查 Redis key：
+### 4. 启动 Redis
+
+```bash
+redis-server
+```
+
+---
+
+### 5. 启动后端
+
+运行：
 
 ```text
-product:list:{page}:{size}:{priceSort}
+FreshLifeApplication
 ```
 
-示例：
+启动成功后访问：
 
 ```text
-product:list:1:10:asc
+http://localhost:8080/api/product/list
 ```
 
-如果没有传 `priceSort`，key 末尾为空排序标识。
+---
 
-### 7. 创建订单失败
+## API测试结果
 
-常见原因：
+### 商品列表
 
-- 未登录或 token 无效
-- 当前用户购物车为空
-- 商品已下架
-- 商品库存不足
+请求：
 
-### 8. 取消订单失败
+```http
+GET /api/product/list
+```
 
-当前只允许取消 `WAIT_PAY` 状态订单。
+结果：
 
-如果订单已取消、已配送或已完成，会返回状态不允许取消。
+```json
+{
+  "code": 0,
+  "message": "成功"
+}
+```
+
+✅ 测试通过
+
+---
+
+### 商品详情
+
+请求：
+
+```http
+GET /api/product/detail/1
+```
+
+结果：
+
+```json
+{
+  "code": 0,
+  "message": "成功"
+}
+```
+
+✅ 测试通过
+
+---
+
+## 当前开发进度
+
+### 后端
+
+```text
+商品模块        ██████████ 100%
+MySQL集成      ██████████ 100%
+Redis缓存      ██████████ 100%
+
+用户模块        ███░░░░░░░ 30%
+购物车模块      ░░░░░░░░░░ 0%
+订单模块        ░░░░░░░░░░ 0%
+```
+
+### 前端
+
+```text
+HarmonyOS首页   ░░░░░░░░░░ 0%
+商品列表页      ░░░░░░░░░░ 0%
+商品详情页      ░░░░░░░░░░ 0%
+接口联调        ░░░░░░░░░░ 0%
+```
+
+---
+
+## 项目亮点
+
+- HarmonyOS NEXT 原生开发
+- Spring Boot + MyBatis-Plus
+- Redis缓存优化
+- 前后端分离架构
+- RESTful API设计
+- JWT认证机制
+- 电商业务场景实践
+
+---
+
+## 作者
+
+Tony Rao
+
+FreshLife 智慧生鲜商城
+
+2026 Spring Semester
+
+Course Project / Portfolio Project
