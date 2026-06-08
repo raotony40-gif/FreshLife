@@ -2,175 +2,373 @@
 
 ## 项目简介
 
-FreshLife 是基于 HarmonyOS + Spring Boot 构建的智慧生鲜商城系统。
+FreshLife 是一个基于 Spring Boot + MySQL + Redis 的智慧生鲜商城后端项目，面向生鲜商品浏览、用户登录认证、购物车管理和订单交易流程。
 
-项目实现了商品展示、商品详情查询、购物车管理、订单管理等核心电商功能，并通过 Redis 缓存提升系统性能。
-
-采用前后端分离架构：
-
-- Frontend：HarmonyOS NEXT（ArkTS）
-- Backend：Spring Boot 3
-- Database：MySQL 8
-- Cache：Redis
-
----
-
-## 系统架构
-
-```text
-HarmonyOS App
-       │
-       ▼
-Spring Boot REST API
-       │
- ┌─────┴─────┐
- ▼           ▼
-MySQL      Redis
-```
+项目采用前后端分离架构，目前已完成后端核心业务闭环，后续计划接入 HarmonyOS ArkTS 前端。
 
 ---
 
 ## 技术栈
 
-### 前端
-
-- HarmonyOS NEXT
-- ArkTS
-- ArkUI
-
 ### 后端
 
-- Spring Boot 3.x
+- Java 17
+- Spring Boot 3.3.5
 - Spring MVC
-- Spring Data Redis
-- MyBatis-Plus
+- MyBatis-Plus 3.5.9
+- MySQL 8
+- Redis
 - JWT
+- BCrypt
+- Lombok
 
-### 数据库
-
-- MySQL 8.0
-
-### 缓存
-
-- Redis 7.x
-
-### 开发工具
+### 工具
 
 - IntelliJ IDEA
-- DevEco Studio
 - Apifox
-- GitHub
+- Maven
+- Git / GitHub
 
 ---
 
 ## 项目结构
 
 ```text
-FreshLife
+backend
+├── src/main/java/com/freshlife
+│   ├── common          # 通用返回结果
+│   ├── config          # 配置类
+│   ├── controller      # 控制器层
+│   ├── dto             # 请求参数对象
+│   ├── entity          # 数据库实体
+│   ├── exception       # 全局异常处理
+│   ├── mapper          # MyBatis-Plus Mapper
+│   ├── service         # 业务接口
+│   ├── utils           # 工具类
+│   └── vo              # 响应视图对象
 │
-├── backend
-│   ├── controller
-│   ├── service
-│   ├── mapper
-│   ├── entity
-│   ├── config
-│   ├── exception
-│   └── utils
+├── src/main/resources
+│   └── application.yml
 │
 ├── database
 │   └── freshlife.sql
 │
 ├── docs
-│   ├── API.md
-│   └── Design.md
-│
-├── frontend
-│   └── HarmonyOS App
+│   └── API.md
 │
 └── README.md
 ```
 
 ---
 
-## 已实现功能
+## 已完成功能
 
-### 商品列表
+### 1. 用户模块
+
+已完成：
+
+- 用户注册
+- 用户登录
+- BCrypt 密码加密
+- JWT Token 生成
+- JWT Token 解析
+- 获取当前登录用户信息
+
+接口：
+
+```http
+POST /api/user/register
+POST /api/user/login
+GET  /api/user/info
+```
+
+---
+
+### 2. 商品模块
+
+已完成：
+
+- 商品列表查询
+- 商品详情查询
+- Redis 商品缓存
+- 商品状态过滤
+- 商品分页查询
 
 接口：
 
 ```http
 GET /api/product/list
+GET /api/product/detail/{id}
+GET /api/product/search
 ```
-
-功能：
-
-- 商品分页查询
-- Redis缓存
-- MyBatis-Plus分页
-
-测试结果：
-
-✅ 已完成
 
 ---
 
-### 商品详情
+### 3. 购物车模块
+
+已完成：
+
+- 添加商品到购物车
+- 查询当前用户购物车
+- 修改购物车商品数量
+- 删除购物车商品
+- 当前用户数据隔离
+- 商品小计计算
 
 接口：
 
 ```http
-GET /api/product/detail/{id}
+POST   /api/cart/add
+GET    /api/cart/list
+PUT    /api/cart/update
+DELETE /api/cart/remove/{cartId}
 ```
-
-功能：
-
-- 商品详情查询
-- Redis缓存
-
-测试结果：
-
-✅ 已完成
 
 ---
 
-## 开发计划
+### 4. 订单模块
+
+已完成：
+
+- 创建订单
+- 查询订单列表
+- 查询订单详情
+- 取消订单
+- 支付订单
+- 完成订单
+- 创建订单明细
+- 扣减商品库存
+- 取消订单恢复库存
+- 清空购物车
+- 事务控制
+
+接口：
+
+```http
+POST /api/order/create
+GET  /api/order/list
+GET  /api/order/detail/{orderId}
+PUT  /api/order/cancel/{orderId}
+PUT  /api/order/pay/{orderId}
+PUT  /api/order/finish/{orderId}
+```
+
+---
+
+## 业务流程
+
+### 正常下单流程
+
+```text
+用户注册
+   ↓
+用户登录
+   ↓
+获取 Token
+   ↓
+浏览商品
+   ↓
+加入购物车
+   ↓
+创建订单
+   ↓
+支付订单
+   ↓
+完成订单
+```
+
+订单状态变化：
+
+```text
+WAIT_PAY → PAID → FINISHED
+```
+
+---
+
+### 取消订单流程
+
+```text
+创建订单
+   ↓
+WAIT_PAY
+   ↓
+取消订单
+   ↓
+CANCELLED
+```
+
+取消订单后会自动恢复商品库存。
+
+---
+
+## API 测试结果
+
+已使用 Apifox 完成接口测试。
 
 ### 用户模块
 
-计划实现：
+| 接口 | 状态 |
+|---|---|
+| POST /api/user/register | 通过 |
+| POST /api/user/login | 通过 |
+| GET /api/user/info | 通过 |
 
-- 用户注册
-- 用户登录
-- JWT认证
-- 用户信息管理
+### 商品模块
 
----
+| 接口 | 状态 |
+|---|---|
+| GET /api/product/list | 通过 |
+| GET /api/product/detail/{id} | 通过 |
 
 ### 购物车模块
 
-计划实现：
-
-- 添加商品
-- 删除商品
-- 修改数量
-- 查询购物车
-
----
+| 接口 | 状态 |
+|---|---|
+| POST /api/cart/add | 通过 |
+| GET /api/cart/list | 通过 |
+| PUT /api/cart/update | 通过 |
+| DELETE /api/cart/remove/{cartId} | 通过 |
 
 ### 订单模块
 
-计划实现：
-
-- 创建订单
-- 查询订单
-- 取消订单
-- 状态管理
+| 接口 | 状态 |
+|---|---|
+| POST /api/order/create | 通过 |
+| GET /api/order/list | 通过 |
+| GET /api/order/detail/{orderId} | 通过 |
+| PUT /api/order/cancel/{orderId} | 通过 |
+| PUT /api/order/pay/{orderId} | 通过 |
+| PUT /api/order/finish/{orderId} | 通过 |
 
 ---
 
-## 数据库设计
+## 核心测试结果
 
-核心表：
+### 商品列表
+
+```http
+GET http://localhost:8080/api/product/list
+```
+
+返回：
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "records": []
+  }
+}
+```
+
+---
+
+### 用户登录
+
+```http
+POST http://localhost:8080/api/user/login
+```
+
+请求：
+
+```json
+{
+  "username": "tony",
+  "password": "123456"
+}
+```
+
+返回：
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "token": "jwt-token",
+    "userInfo": {}
+  }
+}
+```
+
+---
+
+### 创建订单
+
+```http
+POST http://localhost:8080/api/order/create
+```
+
+返回：
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "orderId": 2,
+    "orderNo": "FL20260608151948726359395",
+    "totalAmount": 9.80,
+    "payAmount": 9.80,
+    "status": "WAIT_PAY"
+  }
+}
+```
+
+---
+
+### 支付订单
+
+```http
+PUT http://localhost:8080/api/order/pay/2
+```
+
+返回：
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": true
+}
+```
+
+订单状态：
+
+```text
+WAIT_PAY → PAID
+```
+
+---
+
+### 完成订单
+
+```http
+PUT http://localhost:8080/api/order/finish/2
+```
+
+返回：
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": true
+}
+```
+
+订单状态：
+
+```text
+PAID → FINISHED
+```
+
+---
+
+## 数据库表
+
+当前核心表：
 
 ```text
 user
@@ -180,74 +378,114 @@ orders
 order_item
 ```
 
-目前已完成：
+### user
+
+用于保存用户信息。
+
+主要字段：
 
 ```text
-product
+id
+username
+password
+phone
+nickname
+avatar_url
+status
+create_time
+update_time
+deleted
 ```
 
-测试数据：
+### product
+
+用于保存商品信息。
+
+主要字段：
 
 ```text
-西红柿
-鸡蛋
-牛奶
-苹果
-鸡胸肉
+id
+name
+category
+price
+stock
+image_url
+description
+status
+create_time
+update_time
+deleted
+```
+
+### cart
+
+用于保存购物车信息。
+
+主要字段：
+
+```text
+id
+user_id
+product_id
+quantity
+create_time
+update_time
+deleted
+```
+
+### orders
+
+用于保存订单主表信息。
+
+主要字段：
+
+```text
+id
+order_no
+user_id
+total_amount
+delivery_fee
+pay_amount
+status
+pay_time
+finish_time
+cancel_time
+create_time
+update_time
+deleted
+```
+
+### order_item
+
+用于保存订单商品明细。
+
+主要字段：
+
+```text
+id
+order_id
+product_id
+product_name
+product_image_url
+product_price
+quantity
+subtotal
+create_time
+update_time
+deleted
 ```
 
 ---
 
-## 环境要求
+## 本地运行
 
-### JDK
-
-```text
-Java 17+
-```
-
-推荐：
+### 1. 环境要求
 
 ```text
-Temurin JDK 17
-```
-
----
-
-### MySQL
-
-```text
-MySQL 8.0+
-```
-
-数据库名称：
-
-```text
-freshlife
-```
-
----
-
-### Redis
-
-```text
-Redis 7+
-```
-
-默认配置：
-
-```text
-localhost:6379
-```
-
----
-
-## 本地部署
-
-### 1. 克隆项目
-
-```bash
-git clone https://github.com/yourname/freshlife.git
+JDK 17+
+MySQL 8+
+Redis
+Maven
 ```
 
 ---
@@ -255,10 +493,10 @@ git clone https://github.com/yourname/freshlife.git
 ### 2. 创建数据库
 
 ```sql
-CREATE DATABASE freshlife;
+CREATE DATABASE freshlife DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-导入：
+导入数据库文件：
 
 ```text
 database/freshlife.sql
@@ -266,16 +504,27 @@ database/freshlife.sql
 
 ---
 
-### 3. 修改配置文件
+### 3. 修改数据库配置
 
-application.yml
+文件位置：
+
+```text
+src/main/resources/application.yml
+```
+
+示例：
 
 ```yaml
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/freshlife
+    url: jdbc:mysql://localhost:3306/freshlife?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     username: freshlife
     password: freshlife123456
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
 ```
 
 ---
@@ -296,92 +545,137 @@ redis-server
 FreshLifeApplication
 ```
 
-启动成功后访问：
+启动成功后控制台应出现：
+
+```text
+Tomcat started on port 8080 with context path '/api'
+Started FreshLifeApplication
+```
+
+---
+
+### 6. 测试接口
+
+浏览器访问：
 
 ```text
 http://localhost:8080/api/product/list
 ```
 
----
-
-## API测试结果
-
-### 商品列表
-
-请求：
+Apifox 测试登录：
 
 ```http
-GET /api/product/list
+POST http://localhost:8080/api/user/login
 ```
-
-结果：
-
-```json
-{
-  "code": 0,
-  "message": "成功"
-}
-```
-
-✅ 测试通过
 
 ---
 
-### 商品详情
+## 权限说明
 
-请求：
+以下接口无需登录：
 
 ```http
-GET /api/product/detail/1
+POST /api/user/register
+POST /api/user/login
+GET  /api/product/list
+GET  /api/product/detail/{id}
+GET  /api/product/search
 ```
 
-结果：
+以下接口需要携带 JWT Token：
 
-```json
-{
-  "code": 0,
-  "message": "成功"
-}
+```http
+GET    /api/user/info
+
+POST   /api/cart/add
+GET    /api/cart/list
+PUT    /api/cart/update
+DELETE /api/cart/remove/{cartId}
+
+POST /api/order/create
+GET  /api/order/list
+GET  /api/order/detail/{orderId}
+PUT  /api/order/cancel/{orderId}
+PUT  /api/order/pay/{orderId}
+PUT  /api/order/finish/{orderId}
 ```
 
-✅ 测试通过
+请求头格式：
 
----
-
-## 当前开发进度
-
-### 后端
-
-```text
-商品模块        ██████████ 100%
-MySQL集成      ██████████ 100%
-Redis缓存      ██████████ 100%
-
-用户模块        ███░░░░░░░ 30%
-购物车模块      ░░░░░░░░░░ 0%
-订单模块        ░░░░░░░░░░ 0%
-```
-
-### 前端
-
-```text
-HarmonyOS首页   ░░░░░░░░░░ 0%
-商品列表页      ░░░░░░░░░░ 0%
-商品详情页      ░░░░░░░░░░ 0%
-接口联调        ░░░░░░░░░░ 0%
+```http
+Authorization: Bearer your-jwt-token
 ```
 
 ---
 
-## 项目亮点
+## 当前完成度
 
-- HarmonyOS NEXT 原生开发
-- Spring Boot + MyBatis-Plus
-- Redis缓存优化
-- 前后端分离架构
-- RESTful API设计
-- JWT认证机制
-- 电商业务场景实践
+```text
+后端基础架构        100%
+用户认证模块        100%
+商品模块            100%
+购物车模块          100%
+订单模块            100%
+Redis缓存           80%
+接口测试            100%
+前端开发            0%
+管理后台            0%
+部署上线            0%
+```
+
+---
+
+## 当前项目状态
+
+FreshLife 后端目前已经完成核心电商业务闭环：
+
+```text
+注册 → 登录 → 商品浏览 → 加入购物车 → 创建订单 → 支付订单 → 完成订单
+```
+
+同时支持：
+
+```text
+取消订单 → 恢复库存
+```
+
+后端接口已通过 Apifox 测试，数据库读写、JWT 鉴权、事务控制、库存扣减和状态流转均已验证成功。
+
+---
+
+## 后续计划
+
+### 前端开发
+
+计划使用 HarmonyOS ArkTS 开发移动端前端页面：
+
+```text
+登录页
+注册页
+商品首页
+商品详情页
+购物车页
+订单列表页
+订单详情页
+我的页面
+```
+
+---
+
+### 后端增强
+
+后续可继续完善：
+
+```text
+管理员商品管理
+管理员订单管理
+订单分页
+商品分类筛选
+商品搜索优化
+Redis缓存优化
+接口文档完善
+项目部署上线
+```
 
 ---
 
@@ -389,8 +683,6 @@ HarmonyOS首页   ░░░░░░░░░░ 0%
 
 Tony Rao
 
-FreshLife 智慧生鲜商城
+FreshLife 智慧生鲜商城后端项目
 
-2026 Spring Semester
-
-Course Project / Portfolio Project
+2026
