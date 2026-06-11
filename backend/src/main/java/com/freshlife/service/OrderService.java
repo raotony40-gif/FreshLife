@@ -17,4 +17,8 @@ public interface OrderService extends IService<Orders> {
     OrderDetailVO detail(HttpServletRequest request, Long orderId);
 
     Boolean cancel(HttpServletRequest request, Long orderId);
+
+    Boolean pay(HttpServletRequest request, Long orderId);
+
+    Boolean finish(HttpServletRequest request, Long orderId);
 }

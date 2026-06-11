@@ -35,7 +35,9 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
 
     private static final int PRODUCT_STATUS_ON_SALE = 1;
     private static final String ORDER_STATUS_WAIT_PAY = "WAIT_PAY";
+    private static final String ORDER_STATUS_PAID = "PAID";
     private static final String ORDER_STATUS_CANCELLED = "CANCELLED";
+    private static final String ORDER_STATUS_FINISHED = "FINISHED";
 
     private final CartMapper cartMapper;
     private final ProductMapper productMapper;
@@ -168,6 +170,52 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
                     .eq(Product::getId, item.getProductId())
                     .setSql("stock = stock + " + item.getQuantity()));
         }
+        return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean pay(HttpServletRequest request, Long orderId) {
+        Long userId = jwtUserUtils.getCurrentUserId(request);
+        if (orderId == null || orderId <= 0) {
+            throw new BusinessException(400, "订单ID不能为空");
+        }
+
+        int updated = baseMapper.update(null, new LambdaUpdateWrapper<Orders>()
+                .eq(Orders::getId, orderId)
+                .eq(Orders::getUserId, userId)
+                .eq(Orders::getStatus, ORDER_STATUS_WAIT_PAY)
+                .set(Orders::getStatus, ORDER_STATUS_PAID)
+                .set(Orders::getPayTime, LocalDateTime.now())
+                .set(Orders::getUpdateTime, LocalDateTime.now()));
+        if (updated <= 0) {
+            throw new BusinessException(409, "订单不存在或当前状态不允许支付");
+        }
+
+        return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean finish(HttpServletRequest request, Long orderId) {
+        Long userId = jwtUserUtils.getCurrentUserId(request);
+
+        if (orderId == null || orderId <= 0) {
+            throw new BusinessException(400, "订单ID不能为空");
+        }
+
+        int updated = baseMapper.update(null, new LambdaUpdateWrapper<Orders>()
+                .eq(Orders::getId, orderId)
+                .eq(Orders::getUserId, userId)
+                .eq(Orders::getStatus, ORDER_STATUS_PAID)
+                .set(Orders::getStatus, ORDER_STATUS_FINISHED)
+                .set(Orders::getFinishTime, LocalDateTime.now())
+                .set(Orders::getUpdateTime, LocalDateTime.now()));
+
+        if (updated <= 0) {
+            throw new BusinessException(409, "订单不存在或当前状态不允许完成");
+        }
+
         return true;
     }
 

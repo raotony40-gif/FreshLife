@@ -47,4 +47,18 @@ public class OrderController {
             @PathVariable Long orderId) {
         return Result.success(orderService.cancel(request, orderId));
     }
+
+    @PutMapping("/pay/{orderId}")
+    public Result<Boolean> pay(
+            HttpServletRequest request,
+            @PathVariable Long orderId) {
+        return Result.success(orderService.pay(request, orderId));
+    }
+
+    @PutMapping("/finish/{orderId}")
+    public Result<Boolean> finish(
+            HttpServletRequest request,
+            @PathVariable Long orderId) {
+        return Result.success(orderService.finish(request, orderId));
+    }
 }
