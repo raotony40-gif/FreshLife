@@ -1,100 +1,181 @@
-# FreshLife 智慧生鲜商城
+# FreshLife 社区生鲜购物平台
+
+FreshLife 是一个社区生鲜购物平台，面向用户日常买菜、购买水果、蛋奶、肉禽等高频场景。
+
+当前项目已经完成 HarmonyOS NEXT 前端原型与 Spring Boot 后端核心接口联调，形成了从登录、商品浏览、购物车到订单流转的完整业务闭环。
 
 ## 项目简介
 
-FreshLife 是一个基于 Spring Boot + MySQL + Redis 的智慧生鲜商城后端项目，面向生鲜商品浏览、用户登录认证、购物车管理和订单交易流程。
+FreshLife 当前阶段目标是快速验证社区生鲜电商 MVP：
 
-项目采用前后端分离架构，目前已完成后端核心业务闭环，后续计划接入 HarmonyOS ArkTS 前端。
+```text
+登录 -> 商品浏览 -> 商品详情 -> 加入购物车 -> 创建订单 -> 订单查询
+```
 
----
+已完成：
+
+- HarmonyOS NEXT 前端可运行原型
+- Spring Boot 后端核心业务接口
+- MySQL 核心业务表
+- Redis 商品缓存
+- JWT 登录认证
+- Apifox 接口测试通过
+- 前后端联调成功
+- HarmonyOS 模拟器运行成功
+
+## 项目演示效果
+
+截图预留：
+
+```text
+docs/images/demo-login.png
+docs/images/demo-product-list.png
+docs/images/demo-product-detail.png
+docs/images/demo-cart.png
+docs/images/demo-order.png
+```
+
+## 技术架构
+
+```text
+HarmonyOS NEXT
+      ↓
+   REST API
+      ↓
+ Spring Boot
+      ↓
+ MyBatis Plus
+      ↓
+    MySQL
+```
+
+Redis 用于商品缓存，JWT 用于接口认证。
 
 ## 技术栈
 
+### 前端
+
+- HarmonyOS NEXT
+- ArkTS
+- ArkUI
+- Stage Model
+- Navigation
+- Axios
+
 ### 后端
 
-- Java 17
 - Spring Boot 3.3.5
-- Spring MVC
-- MyBatis-Plus 3.5.9
-- MySQL 8
+- MyBatis Plus
 - Redis
 - JWT
-- BCrypt
 - Lombok
 
-### 工具
+### 数据库
 
-- IntelliJ IDEA
-- Apifox
-- Maven
-- Git / GitHub
-
----
+- MySQL 8
 
 ## 项目结构
 
 ```text
-backend
-├── src/main/java/com/freshlife
-│   ├── common          # 通用返回结果
-│   ├── config          # 配置类
-│   ├── controller      # 控制器层
-│   ├── dto             # 请求参数对象
-│   ├── entity          # 数据库实体
-│   ├── exception       # 全局异常处理
-│   ├── mapper          # MyBatis-Plus Mapper
-│   ├── service         # 业务接口
-│   ├── utils           # 工具类
-│   └── vo              # 响应视图对象
-│
-├── src/main/resources
-│   └── application.yml
-│
-├── database
+FRESH-LIFE/
+├── backend/                 # Spring Boot 后端
+│   ├── pom.xml
+│   └── src/main/
+│       ├── java/com/freshlife/
+│       │   ├── controller/
+│       │   ├── service/
+│       │   ├── mapper/
+│       │   ├── entity/
+│       │   ├── dto/
+│       │   ├── vo/
+│       │   ├── config/
+│       │   ├── common/
+│       │   ├── exception/
+│       │   └── utils/
+│       └── resources/
+│           └── application.yml
+├── frontend/                # HarmonyOS NEXT 前端
+│   ├── oh-package.json5
+│   ├── build-profile.json5
+│   └── entry/src/main/ets/
+│       ├── pages/
+│       ├── model/
+│       ├── service/
+│       └── utils/
+├── database/
 │   └── freshlife.sql
-│
-├── docs
-│   └── API.md
-│
-└── README.md
+└── docs/
+    ├── API.md
+    ├── TEST-RESULT.md
+    └── PROJECT-STATUS.md
 ```
 
----
+## 已实现功能
 
-## 已完成功能
+### 用户模块
 
-### 1. 用户模块
-
-已完成：
-
-- 用户注册
 - 用户登录
-- BCrypt 密码加密
-- JWT Token 生成
-- JWT Token 解析
-- 获取当前登录用户信息
+- JWT Token 返回
+- 前端保存 Token
+- 后续请求统一携带 `Authorization: Bearer {token}`
 
-接口：
+### 商品模块
+
+- 商品列表
+- 商品详情
+- 商品缓存
+- 商品浏览页面
+- 商品详情页面
+
+### 购物车模块
+
+- 购物车页面
+- 加入购物车接口
+- 查询购物车接口
+- 修改购物车数量接口
+- 删除购物车商品接口
+
+### 订单模块
+
+- 创建订单
+- 查询订单
+- 查询订单详情
+- 支付订单
+- 完成订单
+- 订单页面
+
+## 系统流程
+
+```text
+登录
+  ↓
+商品浏览
+  ↓
+商品详情
+  ↓
+加入购物车
+  ↓
+创建订单
+  ↓
+订单查询
+```
+
+## API 接口概览
+
+接口统一前缀：
+
+```text
+http://127.0.0.1:8080/api
+```
+
+### 用户接口
 
 ```http
-POST /api/user/register
 POST /api/user/login
 GET  /api/user/info
 ```
 
----
-
-### 2. 商品模块
-
-已完成：
-
-- 商品列表查询
-- 商品详情查询
-- Redis 商品缓存
-- 商品状态过滤
-- 商品分页查询
-
-接口：
+### 商品接口
 
 ```http
 GET /api/product/list
@@ -102,20 +183,7 @@ GET /api/product/detail/{id}
 GET /api/product/search
 ```
 
----
-
-### 3. 购物车模块
-
-已完成：
-
-- 添加商品到购物车
-- 查询当前用户购物车
-- 修改购物车商品数量
-- 删除购物车商品
-- 当前用户数据隔离
-- 商品小计计算
-
-接口：
+### 购物车接口
 
 ```http
 POST   /api/cart/add
@@ -124,25 +192,7 @@ PUT    /api/cart/update
 DELETE /api/cart/remove/{cartId}
 ```
 
----
-
-### 4. 订单模块
-
-已完成：
-
-- 创建订单
-- 查询订单列表
-- 查询订单详情
-- 取消订单
-- 支付订单
-- 完成订单
-- 创建订单明细
-- 扣减商品库存
-- 取消订单恢复库存
-- 清空购物车
-- 事务控制
-
-接口：
+### 订单接口
 
 ```http
 POST /api/order/create
@@ -153,536 +203,109 @@ PUT  /api/order/pay/{orderId}
 PUT  /api/order/finish/{orderId}
 ```
 
----
-
-## 业务流程
-
-### 正常下单流程
+详细接口说明见：
 
 ```text
-用户注册
-   ↓
-用户登录
-   ↓
-获取 Token
-   ↓
-浏览商品
-   ↓
-加入购物车
-   ↓
-创建订单
-   ↓
-支付订单
-   ↓
-完成订单
+docs/API.md
 ```
 
-订单状态变化：
+## 项目运行
 
-```text
-WAIT_PAY → PAID → FINISHED
+### 后端启动
+
+环境要求：
+
+- JDK 17
+- Maven 3.9+
+- MySQL 8
+- Redis 7
+
+初始化数据库：
+
+```bash
+mysql -ufreshlife -p freshlife < database/freshlife.sql
 ```
 
----
-
-### 取消订单流程
-
-```text
-创建订单
-   ↓
-WAIT_PAY
-   ↓
-取消订单
-   ↓
-CANCELLED
-```
-
-取消订单后会自动恢复商品库存。
-
----
-
-## API 测试结果
-
-已使用 Apifox 完成接口测试。
-
-### 用户模块
-
-| 接口 | 状态 |
-|---|---|
-| POST /api/user/register | 通过 |
-| POST /api/user/login | 通过 |
-| GET /api/user/info | 通过 |
-
-### 商品模块
-
-| 接口 | 状态 |
-|---|---|
-| GET /api/product/list | 通过 |
-| GET /api/product/detail/{id} | 通过 |
-
-### 购物车模块
-
-| 接口 | 状态 |
-|---|---|
-| POST /api/cart/add | 通过 |
-| GET /api/cart/list | 通过 |
-| PUT /api/cart/update | 通过 |
-| DELETE /api/cart/remove/{cartId} | 通过 |
-
-### 订单模块
-
-| 接口 | 状态 |
-|---|---|
-| POST /api/order/create | 通过 |
-| GET /api/order/list | 通过 |
-| GET /api/order/detail/{orderId} | 通过 |
-| PUT /api/order/cancel/{orderId} | 通过 |
-| PUT /api/order/pay/{orderId} | 通过 |
-| PUT /api/order/finish/{orderId} | 通过 |
-
----
-
-## 核心测试结果
-
-### 商品列表
-
-```http
-GET http://localhost:8080/api/product/list
-```
-
-返回：
-
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "records": []
-  }
-}
-```
-
----
-
-### 用户登录
-
-```http
-POST http://localhost:8080/api/user/login
-```
-
-请求：
-
-```json
-{
-  "username": "tony",
-  "password": "123456"
-}
-```
-
-返回：
-
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "token": "jwt-token",
-    "userInfo": {}
-  }
-}
-```
-
----
-
-### 创建订单
-
-```http
-POST http://localhost:8080/api/order/create
-```
-
-返回：
-
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "orderId": 2,
-    "orderNo": "FL20260608151948726359395",
-    "totalAmount": 9.80,
-    "payAmount": 9.80,
-    "status": "WAIT_PAY"
-  }
-}
-```
-
----
-
-### 支付订单
-
-```http
-PUT http://localhost:8080/api/order/pay/2
-```
-
-返回：
-
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": true
-}
-```
-
-订单状态：
-
-```text
-WAIT_PAY → PAID
-```
-
----
-
-### 完成订单
-
-```http
-PUT http://localhost:8080/api/order/finish/2
-```
-
-返回：
-
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": true
-}
-```
-
-订单状态：
-
-```text
-PAID → FINISHED
-```
-
----
-
-## 数据库表
-
-当前核心表：
-
-```text
-user
-product
-cart
-orders
-order_item
-```
-
-### user
-
-用于保存用户信息。
-
-主要字段：
-
-```text
-id
-username
-password
-phone
-nickname
-avatar_url
-status
-create_time
-update_time
-deleted
-```
-
-### product
-
-用于保存商品信息。
-
-主要字段：
-
-```text
-id
-name
-category
-price
-stock
-image_url
-description
-status
-create_time
-update_time
-deleted
-```
-
-### cart
-
-用于保存购物车信息。
-
-主要字段：
-
-```text
-id
-user_id
-product_id
-quantity
-create_time
-update_time
-deleted
-```
-
-### orders
-
-用于保存订单主表信息。
-
-主要字段：
-
-```text
-id
-order_no
-user_id
-total_amount
-delivery_fee
-pay_amount
-status
-pay_time
-finish_time
-cancel_time
-create_time
-update_time
-deleted
-```
-
-### order_item
-
-用于保存订单商品明细。
-
-主要字段：
-
-```text
-id
-order_id
-product_id
-product_name
-product_image_url
-product_price
-quantity
-subtotal
-create_time
-update_time
-deleted
-```
-
----
-
-## 本地运行
-
-### 1. 环境要求
-
-```text
-JDK 17+
-MySQL 8+
-Redis
-Maven
-```
-
----
-
-### 2. 创建数据库
-
-```sql
-CREATE DATABASE freshlife DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-导入数据库文件：
-
-```text
-database/freshlife.sql
-```
-
----
-
-### 3. 修改数据库配置
-
-文件位置：
-
-```text
-src/main/resources/application.yml
-```
-
-示例：
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/freshlife?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
-    username: freshlife
-    password: freshlife123456
-
-  data:
-    redis:
-      host: localhost
-      port: 6379
-```
-
----
-
-### 4. 启动 Redis
+启动 Redis：
 
 ```bash
 redis-server
 ```
 
----
+启动 Spring Boot：
 
-### 5. 启动后端
+```bash
+cd backend
+mvn spring-boot:run
+```
 
-运行：
+默认后端地址：
 
 ```text
-FreshLifeApplication
+http://127.0.0.1:8080/api
 ```
 
-启动成功后控制台应出现：
+当前后端数据库配置：
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/freshlife
+    username: freshlife
+    password: freshlife123456
+```
+
+### 前端启动
+
+环境要求：
+
+- DevEco Studio
+- HarmonyOS / OpenHarmony SDK
+- HarmonyOS 模拟器
+
+启动方式：
 
 ```text
-Tomcat started on port 8080 with context path '/api'
-Started FreshLifeApplication
+DevEco Studio -> Open frontend -> Run
 ```
 
----
-
-### 6. 测试接口
-
-浏览器访问：
+前端当前登录接口：
 
 ```text
-http://localhost:8080/api/product/list
+POST http://127.0.0.1:8080/api/user/login
 ```
 
-Apifox 测试登录：
-
-```http
-POST http://localhost:8080/api/user/login
-```
-
----
-
-## 权限说明
-
-以下接口无需登录：
-
-```http
-POST /api/user/register
-POST /api/user/login
-GET  /api/product/list
-GET  /api/product/detail/{id}
-GET  /api/product/search
-```
-
-以下接口需要携带 JWT Token：
-
-```http
-GET    /api/user/info
-
-POST   /api/cart/add
-GET    /api/cart/list
-PUT    /api/cart/update
-DELETE /api/cart/remove/{cartId}
-
-POST /api/order/create
-GET  /api/order/list
-GET  /api/order/detail/{orderId}
-PUT  /api/order/cancel/{orderId}
-PUT  /api/order/pay/{orderId}
-PUT  /api/order/finish/{orderId}
-```
-
-请求头格式：
-
-```http
-Authorization: Bearer your-jwt-token
-```
-
----
-
-## 当前完成度
+当前联调用测试账号：
 
 ```text
-后端基础架构        100%
-用户认证模块        100%
-商品模块            100%
-购物车模块          100%
-订单模块            100%
-Redis缓存           80%
-接口测试            100%
-前端开发            0%
-管理后台            0%
-部署上线            0%
+username: tony
+password: 123456
 ```
 
----
+## 项目成果
 
-## 当前项目状态
+- 前后端联调成功
+- HarmonyOS 模拟器运行成功
+- REST API 联调成功
+- JWT 认证成功
+- Apifox 测试通过
+- 商品缓存接入 Redis
+- 用户端核心购物流程已跑通
 
-FreshLife 后端目前已经完成核心电商业务闭环：
+## 项目亮点
 
-```text
-注册 → 登录 → 商品浏览 → 加入购物车 → 创建订单 → 支付订单 → 完成订单
-```
+- 使用 HarmonyOS NEXT + ArkTS 构建移动端原型，贴近真实端侧运行环境。
+- 后端采用 Spring Boot 单体架构，开发成本低，适合 MVP 快速上线。
+- 通过 JWT 实现登录认证，前端统一携带 Token 访问受保护接口。
+- 商品详情和商品列表接入 Redis 缓存，降低数据库压力。
+- 订单创建包含库存校验、扣减库存、清空购物车等核心交易逻辑。
+- 当前已形成登录、浏览、购物车、下单、支付、完成订单的业务闭环。
 
-同时支持：
+## 后续规划
 
-```text
-取消订单 → 恢复库存
-```
-
-后端接口已通过 Apifox 测试，数据库读写、JWT 鉴权、事务控制、库存扣减和状态流转均已验证成功。
-
----
-
-## 后续计划
-
-### 前端开发
-
-计划使用 HarmonyOS ArkTS 开发移动端前端页面：
-
-```text
-登录页
-注册页
-商品首页
-商品详情页
-购物车页
-订单列表页
-订单详情页
-我的页面
-```
-
----
-
-### 后端增强
-
-后续可继续完善：
-
-```text
-管理员商品管理
-管理员订单管理
-订单分页
-商品分类筛选
-商品搜索优化
-Redis缓存优化
-接口文档完善
-项目部署上线
-```
-
----
-
-## 作者
-
-Tony Rao
-
-FreshLife 智慧生鲜商城后端项目
-
-2026
+- 收藏功能
+- 商品搜索页面完善
+- 支付模块接入真实支付渠道
+- 用户中心
+- 订单售后能力
+- 管理后台商品和订单管理
