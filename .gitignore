@@ -1,1 +1,23 @@
 .DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log
+
+# Java / Spring Boot
+target/
+
+# Node / HarmonyOS / frontend build artifacts
+node_modules/
+oh_modules/
+.hvigor/
+build/
+out/
+local.properties
+
+# Generated local outputs
+outputs/

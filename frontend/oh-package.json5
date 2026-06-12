@@ -1,0 +1,13 @@
+{
+  "modelVersion": "5.0.0",
+  "name": "freshlife",
+  "version": "1.0.0",
+  "description": "FreshLife HarmonyOS NEXT app prototype.",
+  "main": "",
+  "author": "FreshLife",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ohos/axios": "^2.0.5"
+  },
+  "devDependencies": {}
+}

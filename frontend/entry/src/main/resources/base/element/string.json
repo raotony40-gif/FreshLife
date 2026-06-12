@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "FreshLife"
+    },
+    {
+      "name": "module_desc",
+      "value": "FreshLife entry module"
+    },
+    {
+      "name": "entryability_desc",
+      "value": "FreshLife main ability"
+    }
+  ]
+}
